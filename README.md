@@ -145,3 +145,43 @@ stream.on('end', function() {
 So when readable event is triggered, the consumer control to call the ``` stream.read() ``` to read the data. if the data is not read, readable event will be throwed back to eventloop and be triggered later.
 
 The Readable stream is also backward competable, so when ‘data’ event is listened. Stream will not use readable event but downgrade to old stream behavior.
+
+
+#### Writable Stream
+
+Writable stream added new ‘drain’ event, which will be triggered when all data in buffer is written. So we can control the timing to write when the buffer is empty.
+
+```javacript
+// node.js >= v0.10
+var fs = require('fs');
+
+var stream      = fs.createReadStream('./test.png');
+var writeStream = fs.createWriteStream('./output.png');
+
+var writable = true;
+var doRead = function() {
+  var data = stream.read();
+  // when writable return false, it means the buffer is full.
+  writable = writeStream.write(data);
+}
+
+stream.on('readable', function() {
+  if(writable) {
+    doRead()
+  } else {
+    // wait for drain event if stream buffer is full
+    writeStream.removeAllListeners('drain');
+    writeStream.once('drain', doRead)
+  }
+});
+
+stream.on('end', function() {
+  writeStream.end();
+});
+
+stream.on('error', function(err) {
+  console.log('something is wrong :( ');
+  writeStream.close();
+});
+
+```
