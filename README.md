@@ -20,3 +20,23 @@ fs.readFile('./test.json', function(data, err){
 });
 
 ```
+However, for large file we may want to do something before the file is completely loaded to save memory buffer. This is where stream comes in:
+
+```javascript
+var fs = require('fs');
+var stream = fs.createReadStream('./test.png');
+
+stream.on('data', function(data) {
+  console.log('loaded part of the file \n');
+  console.log(data);
+});
+
+stream.on('end', function() {
+  console.log('all parts is loaded');
+});
+
+stream.on('error', function(err) {
+  console.log('something is wrong :( ');
+});
+
+```
