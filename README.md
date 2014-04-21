@@ -106,3 +106,42 @@ var writeStream = fs.createWriteStream('./test-gzip.jpg');
 
 // write gzipped image file
 stream.pipe(gzip).pipe(writeStream);
+
+
+
+#### Stream2 (Readable and Writable stream)
+
+One problem of the ‘data’ event based stream is the stream consumer can’t control the timimg of read and how much data to read each times. When data event is triggered, handler function need to store the data into buffer or write it to disk right away. That becomes a problem when we have slow or limited write I/O.
+
+Therefore, in node.js v0.10. It introduce the new stream interface, called stream2.
+
+It provides 2 new stream classes:
+
+#### Readable Stream
+
+Readable stream extend the old stream interface with new ‘readable’ event, which let the consumer control the timing of read and how many bytes to read.
+
+```javascript
+// node.js >= v0.10
+var fs = require('fs');
+var stream = fs.createReadStream('./input.mp4');
+var writeStream = fs.createWriteStream('./output.mp4');
+
+stream.on('readable', function() {
+  // stream is ready to read
+  var data = stream.read();
+
+  console.log(data)
+
+  writeStream.write(data);
+});
+
+stream.on('end', function() {
+  writeStream.end();
+});
+
+```
+
+So when readable event is triggered, the consumer control to call the ``` stream.read() ``` to read the data. if the data is not read, readable event will be throwed back to eventloop and be triggered later.
+
+The Readable stream is also backward competable, so when ‘data’ event is listened. Stream will not use readable event but downgrade to old stream behavior.
