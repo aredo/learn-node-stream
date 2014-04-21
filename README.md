@@ -77,3 +77,32 @@ stream.on('error', function(err) {
 ```
 
 This will write the data to file when it receive part of the data.
+
+#### Pipe
+
+Pipe is another concept that can let you redirect input to output. The above download file code can be present with pipe:
+
+```javascript
+var fs = require('fs');
+var request = require('request');
+
+var stream      = request('https://s3.amazonaws.com/ooomf-com-files/8jLdwLg6TLKIQfJcZgDb_Freedom_5.jpg');
+var writeStream = fs.createWriteStream('./testimg.jpg');
+
+stream.pipe(writeStream);
+
+```
+
+What pipe function do is, it connect the read and write events between streams, and return another pipe. So we can even chaining multiple pipes together:
+
+
+```javascript
+var fs          = require('fs');
+var request     = require('request');
+var gzip        = require('zlib').createGzip();
+
+var stream      = request('https://s3.amazonaws.com/ooomf-com-files/RpgvvtYAQeqAIs1knERU_vegetables.jpg');
+var writeStream = fs.createWriteStream('./test-gzip.jpg');
+
+// write gzipped image file
+stream.pipe(gzip).pipe(writeStream);
