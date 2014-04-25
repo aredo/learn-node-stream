@@ -106,8 +106,7 @@ var writeStream = fs.createWriteStream('./test-gzip.jpg');
 
 // write gzipped image file
 stream.pipe(gzip).pipe(writeStream);
-
-
+```
 
 #### Stream2 (Readable and Writable stream)
 
